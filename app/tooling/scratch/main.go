@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/ardanlabs/blockchain/foundation/blockchain/database"
+	"github.com/ardanlabs/blockchain/foundation/blockchain/signature"
+	"github.com/ethereum/go-ethereum/crypto"
 	"log"
 	"net/http"
 )
@@ -23,6 +25,21 @@ func sendTransaction() error {
 	if err != nil {
 		return err
 	}
+
+	privKey, err := crypto.LoadECDSA("zblock/accounts/nathan.ecdsa")
+
+	signedTx, err := tx.Sign(privKey)
+	if err != nil {
+		return err
+	}
+
+	address, err := signature.FromAddress(tx, signedTx.V, signedTx.R, signedTx.S)
+
+	if err != nil {
+		return err
+	}
+
+	log.Println("address: ", address)
 
 	data, err := json.Marshal(tx)
 
